@@ -10,7 +10,7 @@ const records = JSON.parse(localStorage.getItem("records") || "[]");
 const searchInput = document.getElementById("search");
 const ignoreCase = document.getElementById("ignoreCase");
 const sortInput = document.getElementById("sort");
-const forMsg = document.getElementById("formMsg");
+const formMsg = document.getElementById("formMsg");
 
 form.addEventListener("submit", function(event) {
     event.preventDefault();
@@ -44,11 +44,14 @@ if(duplicateWords.test(description.value)) {
 formMsg.textContent = "Transaction is valid!";
 
 const record = {
-    description: description.value,
-    amount: Number(amount.value),
-    type: document.getElementById("type").value,
-    category: category.value,
-    date: date.value
+   id: crypto.randomUUID(),
+   CreatedAt: new Date().toISOString(),
+   updateAt: new Date().toISOString(),
+   description: description.value,
+   amount: Number(amount.value),
+   type: document.getElementById("type").value,
+   category: category.value,
+   date: date.value
 };
 
  records.push(record);
@@ -87,6 +90,7 @@ const record = {
     }
 
     record.description = newName;
+    record.updatedAt = new Date().toISOString();
     row.cells[0].textContent = newName;
 
     saveRecords();
@@ -114,14 +118,35 @@ function searchRecords() {
         );
 
         rows.querySelectorAll("tr").forEach(row => {
-            const text = row.cells[0].textContent;
+            const cell = row.cells[0];
+            const text = cell.textContent;
+
             row.hidden = !regex.test(text);
+            cell.replaceChildren();
+
+            let last = 0;
+            const matches = new RegExp(regex.source, "g" + (ignoreCase.checked ? "i" : ""));
+
+            for(const match of text.matchAll(matches)) {
+              if (!match[0]) continue;
+
+            cell.append(
+                document.cretateTextNode(text.slice(last, match.index))
+            );
+            
+            const mark = document.createElement("mark");
+            mark.textContent = match[0];
+            cell.append(mark);
+            
+            last = match.index + match[0].length;
+            }
+            cell.append(document.createTextNode(text.slice(last)));
         });
-    } catch {
-        formMsg.textContent = "Inalid search pattern.";
+    }catch (error) {
+        formMsg.textContent = "Invalid search pattern.";
+      }
     }
-}
- 
+
 sortInput.addEventListener("change", sortRecords);
 
 function sortRecords() {
@@ -166,6 +191,21 @@ function updateDashboard() {
     document.getElementById("balance").textContent = income - spent;
     document.getElementById("count").textContent = records.length;
 
+    const totals = {};
+
+    records.forEach(record => {
+        if(record.type === "expense") {
+            totals[record.category] =
+            (totals[record.category] || 0) + record.amount;
+      }
+    });
+
+    const top = Object.keys(totals).sort(
+        (a,b) => totals[b] - totals[a]
+    )[0];
+
+    document.getElementById("topCategory").textContent = top || "None";
+
     updateBudget();
     updateChart();
 }
@@ -195,7 +235,7 @@ document.getElementById("saveSettings").addEventListener("click", function(){
     const currency = document.getElementById("currency").value;
 
     localStorage.setItem("budget", budget);
-    localStorage.setItem("currecy", currency);
+    localStorage.setItem("currency", currency);
 
     updateBudget();
 });
@@ -259,7 +299,7 @@ document.getElementById("export"). addEventListener( "click", function() {
     link.download = "finance-data.json";
     link.click();
 
-    URL.revokeObjectURL(link.hre);
+    URL.revokeObjectURL(link.href);
 
 });
 
@@ -284,7 +324,7 @@ document.getElementById("import").addEventListener("change", async function(even
          localStorage.setItem("records", JSON.stringify(data.records));
          
          if(data.budget != null && Number.isFinite(Number(data.budget))) {
-            localStorage.setItem("budget", data,budget);
+            localStorage.setItem("budget", data.budget);
          }
          
          if (["RWF", "USD", "EUR"].includes(data.currency)) {
