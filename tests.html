@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Validation Tests</title>
+    </head>
+    <body>
+        <h1>Regex Validation Tests</h1>
+        <p id="result"></p>
+
+        <script type="module">
+            import{ rules, duplicateWords } from "./scripts/validators.js";
+
+            const tests = [
+                rules.description.test("Lunch"),
+                !rules.description.test(" Lunch"),
+                rules.amount.test("2500.50"),
+                !rules.amount.test("25.555"),
+                rules.date.test("2026-10-17"),
+                rules.category.test("School fees"),
+                duplicateWords.test("coffee coffee")
+            ];
+
+            document.getElementById("result").textContent =
+            tests.every(Boolean) ? "All 7 tests passed!" : "Some tests failed";
+        </script>
+    </body>
+</html>
