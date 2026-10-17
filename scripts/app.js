@@ -210,6 +210,7 @@ function updateDashboard() {
     convert(income - spent, "RWF",currency).toFixed(2) + "" + currency;
 
     document.getElementById("count").textContent = records.length;
+    document.getElementById("totalTransactions").textContent = records.length;
 
     const totals = {};
 
