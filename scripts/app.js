@@ -51,6 +51,7 @@ const record = {
 };
 
  records.push(record);
+ updateDashboard();
 
  const row = document.createElement("tr");
 
@@ -88,6 +89,7 @@ const record = {
    row.querySelector(".delete").addEventListener("click", function() {
     row.remove();
     records.splice(records.indexOf(record), 1);
+    updateDashboard();
    });
 
 });
@@ -133,7 +135,50 @@ function sortRecords() {
         if (type === "amount") {
             return Number(x) - Number(y);
         }
-        returnx.localCompare(y);
+        return x.localCompare(y);
     });
     sorted.forEach(row => rows.appendChild(row));
 }
+
+function updateDashboard() {
+    let income = 0;
+    let spent = 0;
+
+    records.forEach(record => {
+        if( record .type === "income") {
+            income += record.amount;
+        } else {
+            spent += record.amount;
+        }
+    });
+
+    document.getElementById("income").textContent = income;
+    document.getElementById("spent").textContent = spent;
+    document.getElementById("balance").textContent = income - spent;
+    document.getElementById("count").textContent = records.length;
+    updateBudget();
+}
+
+function updateBudget() {
+    const budget = Number(document.getElementById("budget").value);
+
+    const spent = records 
+    .filter(record => record.type === "expense")
+    .reduce((total ,record) => total + record.amount, 0);
+
+    const message = document.getElementById("budgetMsg");
+
+    if(budget <= 0) {
+        message.textContent = "No budget set.";
+    } else if (spent > budget) {
+        message.textContent = "Budget exceeded by " + (spent - budget);
+    } else {
+        message.textContent = "Budget remaning: " + (budget - spent);
+    }
+
+    message.setAttribute("aria-live", spent > budget && budget > 0 ? "assertive" : "polite")
+}
+
+document.getElementById("saveSettings").addEventListener("click", function(){
+    updateBudget();
+});
