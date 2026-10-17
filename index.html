@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UFT-8">
+        <meta name="viewport" content="width=device-width,  initial-scale=1">
+
+        <title> Student Finance Tracker</title>
+
+        <link rel="stylesheet" href="styles/style.css">
+    </head>
+
+    <body>
+
+        <header>
+            <h1>Student Finance Tracker</h1>
+
+            <nav>
+                <a href="#dashboard">Dashboard</a>
+                <a href="#transactions">Transactions</a>
+                <a href="#add">Add</a>
+                <a href="#settings">Settings</a>
+                <a href="#about">About</a>
+            </nav>
+        </header>
+
+        <main id="main">
+
+            <section id="dashboard">
+                <h2>Dashboard</h2>
+
+                <div class="cards">
+
+                    <article>
+                        <b>Balance</b>
+                        <p id="balance">0</p>
+                    </article>
+
+                    <article>
+                        <b>Income</b>
+                        <p id="income">0</p>
+                    </article>
+
+                    <article>
+                        <b>Spent</b>
+                        <p id="spent">0</p>
+                    </article>
+
+                    <article>
+                        <b>Records</b>
+                        <p id="count">0</p>
+                    </article>
+                </div>
+
+                <p id="budgetMsg" role="status"></p>
+            </section>
+
+            <section id="transactions">
+                <h2>Transactions</h2>
+
+                <label>
+                    search
+                    <input id="search" type="search">
+                </label>
+
+                <label>
+                    <input id="ignoreCase" type="checkbox" checked>
+                    ignore case
+                </label>
+
+                <label>
+                    sort
+                    <select id="sort">
+                        <option value="date">Date</option>
+                        <option value="description">Description</option>
+                        <option value="amount">Amount</option>
+                    </select>
+                </label>
+
+                <table>
+                    <thread>
+                        <tr>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                            <th>category</th>
+                            <th>Date</th>
+                            <th>Actions</th>        
+                        </tr>
+                    </thread>
+
+                    <tbody id="rows">        
+                    </tbody>
+                </table>
+            </section>
+            <section id="add">
+                <h2>Add Transaction</h2>
+
+                <form id="form">
+                    <label>
+                        Description
+                        <input id="description" required>
+                    </label>
+
+                    <label>
+                        Amount
+                        <input id="amount" required>
+                    </label>
+
+                    <label>
+                        Type
+                        <select id="type">
+                            <option value="expense">Expense</option>
+                            <option value="income">Income</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        category
+                        <input id="category" value="Food" required>
+                    </label>
+
+                    <label>
+                        Date
+                        <input id="date" type="date" required>
+                    </label>
+
+                    <button type="submit">Add Transaction</button>
+
+                    <p id="formMsg" role="alert"></p>
+                </form>
+            </section>
+            <section id="settings">
+                <h2>settings</h2>
+
+                <label>
+                    Monthly Budget
+                    <input id="budget" type="number">
+                </label>
+
+                <label>
+                    Currency
+                    <select id="currency">
+                        <option>RWF</option>
+                        <option>USD</option>
+                        <option>EUR</option>
+                    </select>
+                </label>
+
+                <button id="saveSettings">Save Setings</button>
+
+                <label>
+                    Import JSON
+                    <input id="import" type="file" accept=".json">
+                </label>
+
+                <button id="export">Export JSON</button>
+            </section>
+
+            <section id="about">
+                <h2>About</h2>
+
+                <p>
+                    Student Finance Tracker helps students
+                    manage income, expenses and budgets.
+                </p>
+
+                <p>
+                    This project was created for a web development assignment.
+                </p>
+            </section>
+
+        </main>
+
+    </body>
+</html>
