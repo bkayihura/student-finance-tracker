@@ -164,3 +164,20 @@ button {
 button:hover {
     transform: translateY(-2px);
 }
+
+.chart {
+    display: flex;
+    align-items: end;
+    gap: 10px;
+    height: 150px;
+    padding: 10px;
+    background: #eef2f7;
+    border-radius: 8px;
+}
+
+.bar {
+    flex: 1;
+    background: #2563eb;
+    min-height: 4px;
+    border-radius: 4px 4px 0 0;
+}

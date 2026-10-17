@@ -6,10 +6,11 @@ const amount = document.getElementById("amount");
 const category = document.getElementById("category");
 const date = document.getElementById("date");
 const rows = document.getElementById("rows");
-const records = [];
+const records = JSON.parse(localStorage.getItem("records") || "[]");
 const searchInput = document.getElementById("search");
 const ignoreCase = document.getElementById("ignoreCase");
 const sortInput = document.getElementById("sort");
+const forMsg = document.getElementById("formMsg");
 
 form.addEventListener("submit", function(event) {
     event.preventDefault();
@@ -51,7 +52,11 @@ const record = {
 };
 
  records.push(record);
+ saveRecords();
+ displayRecord(record);
  updateDashboard();
+});
+ function displayRecord(record){
 
  const row = document.createElement("tr");
 
@@ -83,6 +88,10 @@ const record = {
 
     record.description = newName;
     row.cells[0].textContent = newName;
+
+    saveRecords();
+    sortRecords();
+    searchRecords();
    });
 
 
@@ -90,9 +99,9 @@ const record = {
     row.remove();
     records.splice(records.indexOf(record), 1);
     updateDashboard();
+    saveRecords();
    });
-
-});
+}
 
 searchInput.addEventListener("input", searchRecords);
 ignoreCase.addEventListener("change", searchRecords);
@@ -135,7 +144,7 @@ function sortRecords() {
         if (type === "amount") {
             return Number(x) - Number(y);
         }
-        return x.localCompare(y);
+        return x.localeCompare(y);
     });
     sorted.forEach(row => rows.appendChild(row));
 }
@@ -156,7 +165,9 @@ function updateDashboard() {
     document.getElementById("spent").textContent = spent;
     document.getElementById("balance").textContent = income - spent;
     document.getElementById("count").textContent = records.length;
+
     updateBudget();
+    updateChart();
 }
 
 function updateBudget() {
@@ -180,5 +191,109 @@ function updateBudget() {
 }
 
 document.getElementById("saveSettings").addEventListener("click", function(){
+    const budget = document.getElementById("budget").value;
+    const currency = document.getElementById("currency").value;
+
+    localStorage.setItem("budget", budget);
+    localStorage.setItem("currecy", currency);
+
     updateBudget();
+});
+
+function updateChart() {
+    const chart = document.getElementById("chart");
+    chart.innerHTML = "";
+
+    for (let i = 6; i >= 0; i--){
+        const day = new Date();
+        day.setDate(day.getDate() - i);
+
+        const dateText = [
+            day.getFullYear(),
+            String(day.getMonth() + 1).padStart(2, "0"),
+            String(day.getDate()). padStart(2, "0")
+        ].join("-");
+
+        const total = records
+        .filter(r => r.type === "expense" && r.date === dateText)
+        .reduce((sum, r) => sum + r.amount, 0);
+
+        const bar = document.createElement("div");
+        bar.className = "bar";
+        bar.style.height = Math.min(130, Math.max(4, total / 100)) + "px";
+        bar.title = dateText + ":" + total;
+
+        chart.appendChild(bar);
+    }
+}
+
+function saveRecords() {
+    localStorage.setItem("records", JSON.stringify(records));
+}
+
+document.getElementById("budget").value = 
+    localStorage.getItem("budget") || "";
+
+document.getElementById("currency").value =
+    localStorage.getItem("currency") || "RWF";    
+
+records.forEach(displayRecord);
+sortRecords();
+searchRecords();
+updateDashboard();
+
+document.getElementById("export"). addEventListener( "click", function() {
+    const data = {
+        records: records,
+        budget: localStorage.getItem("budget"),
+        currency: localStorage.getItem("currency")
+    };
+
+    const file = new Blob(
+        [JSON.stringify(data, null, 2)],
+        {type: "application/json"}
+    );
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(file);
+    link.download = "finance-data.json";
+    link.click();
+
+    URL.revokeObjectURL(link.hre);
+
+});
+
+document.getElementById("import").addEventListener("change", async function(event) {
+    const file = event.target.files[0];
+    if(!file) return;
+
+    try{
+        const text = await file.text();
+        const data = JSON.parse(text);
+
+        if(!Array.isArray(data.records) ||
+           !data.records.every(r => 
+            typeof r.description === "string" &&
+            typeof r.amount === "number" &&
+            ["income", "expense"].includes(r.type) &&
+            typeof r.category === "string" &&
+            typeof r.date === "string"
+           )){
+            throw new Error ("Invalid records");
+           }
+         localStorage.setItem("records", JSON.stringify(data.records));
+         
+         if(data.budget != null && Number.isFinite(Number(data.budget))) {
+            localStorage.setItem("budget", data,budget);
+         }
+         
+         if (["RWF", "USD", "EUR"].includes(data.currency)) {
+            localStorage.setItem("currency", data.currency);
+         }
+
+         alert("Data imported successfully!");
+         location.reload();
+    } catch (error){
+        alert("Invalid JSON file.");
+    }
 });
