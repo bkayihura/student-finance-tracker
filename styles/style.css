@@ -181,3 +181,27 @@ button:hover {
     min-height: 4px;
     border-radius: 4px 4px 0 0;
 }
+
+.skip {
+    position: absolute;
+    left: -9999px;
+}
+
+.skip:focus {
+    left: 10px;
+    top: 10px;
+    background: white;
+    color: black;
+    padding: 10px;
+    z-index: 100;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+button,
+input,
+select{
+    max-width: 100%;
+}
