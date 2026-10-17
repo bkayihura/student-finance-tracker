@@ -12,6 +12,16 @@ const ignoreCase = document.getElementById("ignoreCase");
 const sortInput = document.getElementById("sort");
 const formMsg = document.getElementById("formMsg");
 
+const rates = {
+    RWF: 1,
+    USD: 1450,
+    EUR: 1700
+};
+
+function convert(amount,from, to) {
+ return amount * rates[from] / rates[to];
+}
+
 form.addEventListener("submit", function(event) {
     event.preventDefault();
 
@@ -66,7 +76,7 @@ const record = {
  row.innerHTML = `
       <td>${record.description}</td>
       <td>${record.amount}</td>
-      <td>${record.type}</td>
+      <td>${convert(record.amount, "RWF", document.getElementById("currency").value).toFixed(2)}</td>
       <td>${record.category}</td>
       <td>${record.date}</td>
       <td>
@@ -118,6 +128,7 @@ function searchRecords() {
         );
 
         rows.querySelectorAll("tr").forEach(row => {
+
             const cell = row.cells[0];
             const text = cell.textContent;
 
@@ -131,7 +142,7 @@ function searchRecords() {
               if (!match[0]) continue;
 
             cell.append(
-                document.cretateTextNode(text.slice(last, match.index))
+                document.createTextNode(text.slice(last, match.index))
             );
             
             const mark = document.createElement("mark");
@@ -141,6 +152,7 @@ function searchRecords() {
             last = match.index + match[0].length;
             }
             cell.append(document.createTextNode(text.slice(last)));
+            
         });
     }catch (error) {
         formMsg.textContent = "Invalid search pattern.";
@@ -186,9 +198,17 @@ function updateDashboard() {
         }
     });
 
-    document.getElementById("income").textContent = income;
-    document.getElementById("spent").textContent = spent;
-    document.getElementById("balance").textContent = income - spent;
+    const currency = document.getElementById("currency").value;
+
+    document.getElementById("income").textContent = income
+    convert(income, "RWF", currency).toFixed(2) + "" + currency;
+
+    document.getElementById("spent").textContent = 
+    convert(spent,"RWF", currency).toFixed(2) + "" + currency;
+
+    document.getElementById("balance").textContent =
+    convert(income - spent, "RWF",currency).toFixed(2) + "" + currency;
+
     document.getElementById("count").textContent = records.length;
 
     const totals = {};
@@ -238,6 +258,10 @@ document.getElementById("saveSettings").addEventListener("click", function(){
     localStorage.setItem("currency", currency);
 
     updateBudget();
+    updateDashboard();
+
+    rows.innerHTML= "";
+    records.forEach(displayRecord);
 });
 
 function updateChart() {
